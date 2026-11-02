@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chá de Panela • Joyce & Victor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        terracotta: {
+                            50: '#fdf8f6',
+                            100: '#fbeee9',
+                            200: '#f5d9d0',
+                            600: '#c86d51',
+                            700: '#a85338',
+                            800: '#8c432d',
+                            900: '#743725',
+                        },
+                        sand: {
+                            50: '#faf8f5',
+                            100: '#f2eee3',
+                            200: '#e4dccb',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(245, 217, 208, 0.4);
+        }
+        body {
+            background-color: #1c1917;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .phone-container {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            max-height: 860px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #a85338 #faf8f5;
+        }
+        @media (min-width: 640px) {
+            .phone-container {
+                border-radius: 2.5rem;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                border: 8px solid #292524;
+            }
+        }
+
+        /* Animação pulsante estilo GIF para o raio de aviso */
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .animated-bolt {
+            animation: pulseGlow 1.8s infinite ease-in-out;
+        }
+
+        /* Transição suave ao navegar */
+        body.page-transitioning {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Efeitos SCSS nos Botões */
+        .btn-fill {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+        .btn-fill::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 100%;
+            background: #a85338;
+            border-radius: inherit;
+            z-index: -1;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+        .btn-fill:hover::before { transform: scaleX(1); }
+        .btn-fill:hover { color: #FFFFFF !important; }
+
+        .btn-expand {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: inset 0 0 0 1px #a85338;
+            transition: all 0.3s ease;
+        }
+        .btn-expand::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 100%;
+            background: #a85338;
+            border-radius: inherit;
+            z-index: -1;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0);
+        }
+        .btn-expand:hover::before { transform: scale(1.5); }
+        .btn-expand:hover { color: #FFFFFF !important; box-shadow: inset 0 0 0 1px transparent; }
+
+        .btn-rotate {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: inset 0 0 0 1px #743725;
+            transition: background 0.001s ease 0.3s, color 0.3s ease;
+        }
+        .btn-rotate::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 100%;
+            background: #743725;
+            border-radius: inherit;
+            z-index: -1;
+            transition: transform 0.3s ease;
+            transform: translateY(100%);
+        }
+        .btn-rotate:hover::before { transform: translateY(0); }
+        .btn-rotate:hover { color: #FFFFFF !important; }
+
+        .item-row {
+            transition: all 0.25s ease;
+        }
+        .item-row:hover {
+            transform: translateX(4px);
+            border-color: rgba(168, 83, 56, 0.4);
+            box-shadow: 0 6px 15px -3px rgba(0, 0, 0, 0.08);
+        }
+        .item-row.clicked {
+            background-color: #fbeee9 !important;
+            border-color: #a85338 !important;
+            transform: scale(0.985);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-terracotta-200 selection:text-terracotta-900">
+
+    <div class="phone-container bg-sand-50 relative flex flex-col">
+
+        <!-- Header / Hero Section -->
+        <header class="relative bg-gradient-to-b from-terracotta-800 via-terracotta-700 to-stone-900 text-white px-6 pt-10 pb-14 text-center rounded-b-[2.5rem] shadow-xl flex-shrink-0">
+            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            
+            <div class="relative z-10">
+                <span class="inline-block uppercase tracking-[0.3em] text-xs font-semibold text-terracotta-200 bg-white/10 px-4 py-1.5 rounded-full mb-3 backdrop-blur-sm border border-white/10">
+                    Chá de Panela
+                </span>
+                <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight mb-2">
+                    Joyce <span class="text-terracotta-200 italic font-normal">&amp;</span> Victor
+                </h1>
+                <p class="text-stone-200 text-xs sm:text-sm font-light max-w-xs mx-auto leading-relaxed">
+                    Com muito carinho, convidamos você para celebrar conosco este momento especial rumo ao nosso novo lar!
+                </p>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 px-4 sm:px-5 -mt-6 space-y-5 pb-12 relative z-20">
+
+            <!-- Countdown Timer Card -->
+            <section class="glass-card rounded-3xl p-4 shadow-lg text-center">
+                <div class="flex items-center justify-center gap-2 text-terracotta-700 mb-2">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <span class="font-semibold text-xs uppercase tracking-wider">Contagem Regressiva</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="bg-terracotta-50 p-2 rounded-xl border border-terracotta-100">
+                        <span id="days" class="font-serif text-xl sm:text-2xl font-bold text-terracotta-900 block">00</span>
+                        <span class="text-[10px] uppercase text-stone-500 font-medium">Dias</span>
+                    </div>
+                    <div class="bg-terracotta-50 p-2 rounded-xl border border-terracotta-100">
+                        <span id="hours" class="font-serif text-xl sm:text-2xl font-bold text-terracotta-900 block">00</span>
+                        <span class="text-[10px] uppercase text-stone-500 font-medium">Horas</span>
+                    </div>
+                    <div class="bg-terracotta-50 p-2 rounded-xl border border-terracotta-100">
+                        <span id="minutes" class="font-serif text-xl sm:text-2xl font-bold text-terracotta-900 block">00</span>
+                        <span class="text-[10px] uppercase text-stone-500 font-medium">Min</span>
+                    </div>
+                    <div class="bg-terracotta-50 p-2 rounded-xl border border-terracotta-100">
+                        <span id="seconds" class="font-serif text-xl sm:text-2xl font-bold text-terracotta-900 block">00</span>
+                        <span class="text-[10px] uppercase text-stone-500 font-medium">Seg</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Details Card -->
+            <section class="glass-card rounded-3xl p-5 shadow-lg">
+                <div class="grid grid-cols-2 gap-3 pb-4 border-b border-stone-200/60 text-center">
+                    <div class="bg-terracotta-50/80 p-3 rounded-2xl border border-terracotta-100">
+                        <i class="fa-regular fa-calendar-days text-terracotta-700 text-lg mb-1"></i>
+                        <div class="text-[10px] uppercase tracking-wider text-stone-500 font-medium">Data</div>
+                        <div class="text-stone-900 font-bold text-xs sm:text-sm">22 / 11 / 2026</div>
+                    </div>
+                    <div class="bg-terracotta-50/80 p-3 rounded-2xl border border-terracotta-100">
+                        <i class="fa-regular fa-clock text-terracotta-700 text-lg mb-1"></i>
+                        <div class="text-[10px] uppercase tracking-wider text-stone-500 font-medium">Horário</div>
+                        <div class="text-stone-900 font-bold text-xs sm:text-sm">14:00 horas</div>
+                    </div>
+                </div>
+
+                <div class="pt-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-terracotta-700 mb-1">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span class="font-semibold text-xs uppercase tracking-wider">Local do Evento</span>
+                    </div>
+                    <p class="text-stone-700 text-xs sm:text-sm mb-3">
+                        Rua João Moreira Filho, 65<br>
+                        Jardim Luzitano, Mauá - SP
+                    </p>
+                    <a href="https://maps.app.goo.gl/HHgpJcjU1MVLjwn96" target="_blank" onclick="smoothNavigate(event, this.href)"
+                       class="btn-fill inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-stone-900 text-white text-xs font-medium rounded-xl shadow-md">
+                        <i class="fa-solid fa-map-location-dot"></i> Abrir no Google Maps
+                    </a>
+                </div>
+            </section>
+
+            <!-- RSVP Button -->
+            <section class="text-center">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSetN7aaY6mOtMxm4czV2AI366Ly2yPL8Fu19EIKy80c1yJ2uw/viewform?usp=dialog" target="_blank" onclick="smoothNavigate(event, this.href)"
+                   class="btn-expand flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-gradient-to-r from-terracotta-700 to-terracotta-600 text-white font-semibold rounded-2xl shadow-lg text-xs sm:text-sm">
+                    <i class="fa-regular fa-envelope-open text-base"></i>
+                    <span>Confirmar Presença (RSVP)</span>
+                </a>
+            </section>
+
+            <!-- PIX Section -->
+            <section class="glass-card rounded-3xl p-5 shadow-lg border-2 border-terracotta-200">
+                <div class="text-center mb-3">
+                    <div class="w-9 h-9 mx-auto bg-terracotta-100 text-terracotta-700 rounded-full flex items-center justify-center mb-1.5 shadow-inner">
+                        <i class="fa-solid fa-qrcode text-base"></i>
+                    </div>
+                    <h2 class="font-serif text-lg font-bold text-stone-900">Presente via PIX</h2>
+                    <p class="text-[11px] text-stone-500 mt-0.5">Prefere nos presentear com uma contribuição em dinheiro? Use a chave abaixo:</p>
+                </div>
+
+                <div class="bg-stone-50 p-3.5 rounded-2xl border border-stone-200 space-y-2 text-center">
+                    <div class="text-[11px] text-stone-500 uppercase tracking-wider">Titular: <strong class="text-stone-800">Victor Sena</strong></div>
+                    <div class="font-mono text-xs sm:text-sm font-bold text-stone-900 bg-white py-2 px-3 rounded-xl border border-stone-200 select-all" id="pixKey">
+                        (11) 95140-7767
+                    </div>
+                    <button onclick="copyPix()" id="copyBtn" class="btn-rotate w-full mt-1.5 py-2.5 px-4 bg-terracotta-700 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow">
+                        <i class="fa-regular fa-copy"></i> Copiar Chave PIX (Telefone)
+                    </button>
+                </div>
+            </section>
+
+            <!-- Gift List Trigger Button -->
+            <section class="text-center">
+                <button onclick="toggleModal()" 
+                   class="btn-fill flex items-center justify-center gap-3 w-full py-4 px-6 bg-stone-900 text-white font-semibold rounded-2xl shadow-xl text-sm border border-terracotta-600/30">
+                    <div class="w-8 h-8 rounded-full bg-terracotta-700 text-white flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-gift text-sm"></i>
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs font-bold uppercase tracking-wider text-terracotta-200">Ver Sugestões</div>
+                        <div class="text-sm font-serif font-bold text-white">Lista de Presentes Completa</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-stone-400 text-xs"></i>
+                </button>
+            </section>
+
+        </main>
+
+        <footer class="bg-stone-900 text-stone-400 py-5 text-center text-xs mt-auto flex-shrink-0">
+            <p class="font-serif text-stone-300 text-sm mb-0.5">Joyce &amp; Victor</p>
+            <p>Contamos com a sua presença!</p>
+        </footer>
+
+    </div>
+
+    <!-- Modal / Drawer de Lista de Presentes -->
+    <div id="giftModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="w-full max-w-md bg-sand-50 rounded-t-[2.5rem] sm:rounded-3xl max-h-[88vh] flex flex-col shadow-2xl transform translate-y-full sm:translate-y-0 transition-transform duration-300 overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-terracotta-800 to-terracotta-700 text-white p-5 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                        <i class="fa-solid fa-gift text-terracotta-200"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-bold">Lista de Presentes</h3>
+                        <p class="text-[11px] text-stone-200">Organizada por categorias visualmente</p>
+                    </div>
+                </div>
+                <button onclick="toggleModal()" class="btn-expand w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-5 flex-1">
+                
+                <!-- Destaque 220V / Bivolt Obrigatório com Raio Animado -->
+                <div class="bg-amber-100 border-2 border-amber-500 p-4 rounded-2xl shadow-md flex items-start gap-3">
+                    <div class="animated-bolt w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg">
+                        <i class="fa-solid fa-bolt text-base"></i>
+                    </div>
+                    <div class="text-xs text-amber-950">
+                        <span class="font-bold block mb-1 uppercase tracking-wider text-amber-900 text-sm">Aviso Importante: 220V ou Bivolt</span>
+                        Para eletrodomésticos e aparelhos elétricos, por favor atentar-se obrigatoriamente à voltagem: <strong class="bg-amber-200 px-1.5 py-0.5 rounded text-amber-950 font-bold">220V ou Bivolt</strong>.
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 1: Mesa Posta & Utensílios de Cozinha -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-utensils text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Mesa Posta &amp; Servir</h4>
+                    </div>
+
+                    <!-- Pratos Rasos Quadrados Opalina -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden">
+                                <i class="fa-solid fa-square-full text-base"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 6 Pratos Rasos Quadrados Opalina</h5>
+                                <p class="text-[10px] text-stone-500">Vidro Opalina Premium • R$ 64,99</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-6-pratos-rasos-quadrados-brancos-em-vidro-opalina-premium-design-sofisticado-alta-resistencia-para-restaurantes-e-mesa-posta-elegante-vapt-vupt/p/MLB65764476?pdp_filters=item_id%3AMLB6290864414" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Aparelho de Jantar Geral -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-plate-wheat text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Aparelho de Jantar</h5>
+                                <p class="text-[10px] text-stone-500">Pratos rasos, fundos e sobremesa</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=aparelho+de+jantar" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Jogo de Talheres Inox -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-spoon text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Jogo de Talheres Inox</h5>
+                                <p class="text-[10px] text-stone-500">Faqueiro completo para o dia a dia</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=jogo+de+talheres+inox" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Jogo de Copos e Taças -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-wine-glass text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Jogo de Copos e Taças</h5>
+                                <p class="text-[10px] text-stone-500">Para água, sucos e bebidas em geral</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=jogo+de+copos+e+tacas" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Garrafa Térmica Digital Vittak -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-flask text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Garrafa Térmica Digital Vittak 1L</h5>
+                                <p class="text-[10px] text-stone-500">Com visor digital e cabo de madeira</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/vittak-garrafa-termica-cafe-cha-vacuum-com-visor-digital-temperatura-cabo-madeira-mesa-posta-cor-preta/p/MLB64977460" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Chaleira de Vidro Tampa Bambu com Infusor -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-mug-hot text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Chaleira de Vidro e Tampa Bambu</h5>
+                                <p class="text-[10px] text-stone-500">Transparente com infusor em Inox</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/chaleira-de-vidro-tampa-de-bambu-transparente-com-filtro-infusor-inox-para-cha-cafe-transparente-pacotinho-decor/p/MLB79637754" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 2: Potes, Recipientes & Seladoras -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-box text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Armazenamento &amp; Potes</h4>
+                    </div>
+
+                    <!-- Electrolux Kit 12 Potes Plásticos -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-boxes-packing text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 12 Potes Herméticos Electrolux</h5>
+                                <p class="text-[10px] text-stone-500">Plástico retangulares e empilháveis</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/electrolux-kit-12-potes-hermeticos-de-plastico-retangulares/p/MLB23191928" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Electrolux Kit 4 Potes Vidro e Inox -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-jar text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 4 Potes Herméticos Vidro Electrolux</h5>
+                                <p class="text-[10px] text-stone-500">Vidro temperado com tampa de Inox</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/electrolux-kit-4-potes-hermeticos-de-vidro-e-tampa-inox-com-vedacao-porta-mantimentos-e-alimentos-transparente/p/MLB22570366" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Máquina Seladora Manual de Alimentos -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-stamp text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Máquina Seladora Manual de Alimentos</h5>
+                                <p class="text-[10px] text-stone-500">Para embalagens plásticas (Bivolt/220V)</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/maquina-seladora-manual-de-alimentos-embalagens-110220v-top/up/MLBU1755877602" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 3: Assadeiras & Formas de Bolo -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-bread-slice text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Assadeiras &amp; Formas</h4>
+                    </div>
+
+                    <!-- Marinex Conjunto de Assadeiras Oval Opaline -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-layer-group text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Conjunto Assadeiras Oval Opaline (3 Peças)</h5>
+                                <p class="text-[10px] text-stone-500">Marinex Vidro Temperado Branco</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/marinex-conjunto-de-assadeiras-oval-opaline-3-pecas-branco/p/MLB27410145" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Kit 3 Formas com Fundo Removível -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-circle-notch text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 3 Formas Fundo Removível para Bolo</h5>
+                                <p class="text-[10px] text-stone-500">Antiaderente em Aço Carbono Preto</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-3-formas-para-bolo-torta-com-fundo-removivel-antiaderente-aco-carbono-redondas-preto-pacotinho-decor/p/MLB79544173" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Kit 3 Formas Redondas de Alumínio Bolo e Pudim -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-circle text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 3 Formas Alumínio para Bolo e Pudim</h5>
+                                <p class="text-[10px] text-stone-500">THL Home Prateado polido</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-3-formas-redondas-de-aluminio-para-bolo-e-pudim-thl-home-prateado/p/MLB76467255" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 4: Preparo, Raladores & Têxtil -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-kitchen-set text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Preparo &amp; Acessórios</h4>
+                    </div>
+
+                    <!-- Cortador Fatiador Ralador Mandolin 16 Peças -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-carrot text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Cortador e Ralador Mandolin 16 Peças</h5>
+                                <p class="text-[10px] text-stone-500">Triturador e Fatiador com lâminas em Inox</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/cortador-fatiador-ralador-de-legumes-solar-frutas-vegetais-triturador-picador-manual-16-pecas-para-cozinha-mandolin-inox/p/MLB80864726" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Escorredor de Macarrão Inox WOW -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-filter text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Escorredor de Macarrão e Lavador Inox</h5>
+                                <p class="text-[10px] text-stone-500">WOW World of Wonders em Aço Inox</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/escorredor-de-macarrao-inox-lavador-de-arroz-wow-world-of-wonders/p/MLB59544757" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Kit 10 Panos de Prato Estampados 100% Algodão -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-rug text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 10 Panos de Prato 100% Algodão</h5>
+                                <p class="text-[10px] text-stone-500">Alta absorção com estampas sortidas</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-10-pano-de-prato-estampado-100-algodao/p/MLB23942853" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 5: Organização & Banheiro (Mercado Livre) -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-bath text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Organização &amp; Banheiro</h4>
+                    </div>
+
+                    <!-- Saboneteira Automática -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-pump-soap text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Saboneteira Automática Espuma USB</h5>
+                                <p class="text-[10px] text-stone-500">Mercado Livre • R$ 69,80</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/saboneteira-automatica-espuma-usb-recarregavel-350ml-3-nivei/up/MLBU4153948827" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Escova Silicone Vaso -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-brush text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Escova Silicone para Vaso 2em1</h5>
+                                <p class="text-[10px] text-stone-500">Mercado Livre • R$ 19,59</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/escova-de-silicone-para-vaso-sanitario-2em1-para-banheiro/up/MLBU5093653703" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Kit Porta Sabão em Pó -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-bottle-droplet text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 3 Porta Sabão em Pó 2,5L</h5>
+                                <p class="text-[10px] text-stone-500">Mercado Livre • R$ 47,00</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-3-unid-porta-sabao-em-po-25l-dispenser-amaciante-lavan/up/MLBU3708849998" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Kit Suporte Esponja Inox -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-soap text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Kit 3 Suporte Bucha Inox Prata</h5>
+                                <p class="text-[10px] text-stone-500">Mercado Livre • R$ 19,00</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/kit-3-suporte-porta-bucha-esponja-para-pia-cozinha-organizador-com-gancho-aco-inox-prata/p/MLB69610240" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Lixeira 18L -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Lixeira Inteligente Sensor 18L USB-C</h5>
+                                <p class="text-[10px] text-stone-500">Mercado Livre • R$ 58,97</p>
+                            </div>
+                        </div>
+                        <a href="https://www.mercadolivre.com.br/lixeira-inteligente-18l-sensor-infravermelho-recarregavel-usb-c-anti-odor-cozinha-banheiro/p/MLB62387232" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CATEGORIA 6: Quarto & Enxoval (Enxoval Geral) -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-terracotta-200 pb-1.5">
+                        <i class="fa-solid fa-bed text-terracotta-700 text-xs"></i>
+                        <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-terracotta-900">Quarto &amp; Enxoval</h4>
+                    </div>
+
+                    <!-- Roupa de Cama -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-sheet-plastic text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Roupa de Cama</h5>
+                                <p class="text-[10px] text-stone-500">Jogos de lençol premium aconchegantes</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=jogo+de+cama" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Toalhas de Banho -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-bath text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Toalhas de Banho</h5>
+                                <p class="text-[10px] text-stone-500">Alta absorção e toque macio</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=toalhas+de+banho" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Toalhas de Rosto -->
+                    <div class="item-row glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm" onclick="triggerClickEffect(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-terracotta-100 text-terracotta-700 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                <i class="fa-solid fa-hands-bubbles text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-stone-900">Toalhas de Rosto</h5>
+                                <p class="text-[10px] text-stone-500">Enxoval requintado para lavabo</p>
+                            </div>
+                        </div>
+                        <a href="https://www.google.com/search?q=toalhas+de+rosto" target="_blank" onclick="smoothNavigate(event, this.href); event.stopPropagation();"
+                           class="btn-fill px-3 py-1.5 bg-stone-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap">
+                            Ver <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3.5 bg-stone-100 border-t border-stone-200 text-center flex-shrink-0">
+                <button onclick="toggleModal()" class="btn-fill w-full py-2.5 bg-stone-900 text-white font-medium rounded-xl text-xs">
+                    Fechar Lista
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Contagem Regressiva para 22 de Novembro de 2026 às 14:00
+        const eventDate = new Date("November 22, 2026 14:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            if (distance < 0) {
+                document.getElementById("days").innerText = "00";
+                document.getElementById("hours").innerText = "00";
+                document.getElementById("minutes").innerText = "00";
+                document.getElementById("seconds").innerText = "00";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = String(days).padStart(2, '0');
+            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        function copyPix() {
+            const pixText = "(11) 95140-7767";
+            navigator.clipboard.writeText(pixText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Chave PIX Copiada!';
+                btn.style.backgroundColor = '#16A085';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copiar Chave PIX (Telefone)';
+                    btn.style.backgroundColor = '';
+                }, 3000);
+            });
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('giftModal');
+            const modalPanel = modal.querySelector('div > div');
+            if (modal.classList.contains('opacity-0')) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalPanel.classList.remove('translate-y-full');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalPanel.classList.add('translate-y-full');
+            }
+        }
+
+        function triggerClickEffect(element) {
+            element.classList.add('clicked');
+            setTimeout(() => {
+                element.classList.remove('clicked');
+            }, 350);
+        }
+
+        function smoothNavigate(event, url) {
+            event.preventDefault();
+            document.body.classList.add('page-transitioning');
+            setTimeout(() => {
+                window.open(url, '_blank');
+                document.body.classList.remove('page-transitioning');
+            }, 400);
+        }
+    </script>
+</body>
+</html>
